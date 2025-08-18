@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mila Assist - Assistant virtuel pour streameur</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='style.css')}}"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+      .botText span a {
+        color: #ffff8d; /* Jaune pâle pour contraster avec le fond rouge #ef5350 */
+        text-decoration: underline;
+        font-weight: bold;
+      }
+
+      .botText span a:hover {
+        color: #ffffa8; /* Un jaune légèrement plus clair au survol */
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="chat-header">
+        <h1>Mila Assist - Assistant virtuel pour streameur</h1>
+        <div class="mode-controls">
+          <label for="responseMode">Mode de réponse:</label>
+          <select id="responseMode" class="form-control">
+            <option value="minimal">Minimal (Rapide)</option>
+            <option value="balanced" selected>Équilibré (Recommandé)</option>
+            <option value="natural">Naturel (Avancé)</option>
+          </select>
+          <button id="modeInfo" class="btn btn-info">ℹ️</button>
+        </div>
+        <button id="quit" class="btn btn-danger">Quitter</button>
+      </div>
+      <div id="modeInfoPanel" class="mode-info-panel" style="display: none">
+        <div class="mode-description">
+          <h3 id="modeTitle">Mode Équilibré</h3>
+          <p id="modeDesc">
+            Reformulation avec templates, bon compromis performance/qualité
+          </p>
+          <div class="mode-pros-cons">
+            <div class="pros">
+              <strong>✅ Avantages:</strong>
+              <ul id="modePros"></ul>
+            </div>
+            <div class="cons">
+              <strong>❌ Inconvénients:</strong>
+              <ul id="modeCons"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-body">
+        <div id="chatbox">
+          <div class="botText">
+            <span>Bonjour, je suis votre bot.</span>
+          </div>
+        </div>
+      </div>
+      <div class="chat-footer">
+        <form>
+          <input
+            id="text"
+            type="text"
+            name="msg"
+            placeholder="Message"
+            class="form-control"
+          />
+          <button type="submit" id="send" class="btn btn-warning">
+            Envoyer
+          </button>
+        </form>
+        <div id="feedback" style="display: none">
+          <button id="correct" class="btn btn-success">Correct</button>
+          <button id="incorrect" class="btn btn-danger">Incorrect</button>
+          <div id="expected-response" style="display: none">
+            <input
+              id="expected-text"
+              type="text"
+              name="expected"
+              placeholder="Réponse attendue"
+              class="form-control"
+            />
+            <button id="submit-expected" class="btn btn-primary">
+              Soumettre
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function makeLinksClickable(text) {
+        var urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text.replace(urlRegex, function (url) {
+          return '<a href="' + url + '" target="_blank">' + url + "</a>";
+        });
+      }
+
+      $(document).ready(function () {
+        // Chargement des informations des modes au démarrage
+        loadModeInfo();
+
+        // Gestionnaire pour le changement de mode
+        $("#responseMode").on("change", function () {
+          var selectedMode = $(this).val();
+          changeResponseMode(selectedMode);
+        });
+
+        // Gestionnaire pour afficher/masquer les infos du mode
+        $("#modeInfo").on("click", function () {
+          $("#modeInfoPanel").slideToggle();
+        });
+
+        $("form").on("submit", function (event) {
+          var rawText = $("#text").val().trim();
+          if (rawText === "") {
+            alert("Le champ de texte ne doit pas être vide.");
+            return false;
+          }
+          var userHtml =
+            '<div class="userText"><span>' + rawText + "</span></div>";
+          $("#text").val("");
+          $("#chatbox").append(userHtml);
+          $(".chat-body").scrollTop($(".chat-body")[0].scrollHeight);
+
+          // Indication de traitement
+          var loadingHtml =
+            '<div class="botText loading"><span>💭 Je réfléchis...</span></div>';
+          $("#chatbox").append(loadingHtml);
+          $(".chat-body").scrollTop($(".chat-body")[0].scrollHeight);
+
+          $.ajax({
+            data: {
+              msg: rawText,
+            },
+            type: "POST",
+            url: "/get",
+          })
+            .done(function (data) {
+              // Suppression de l'indicateur de chargement
+              $(".loading").remove();
+
+              var processedData = makeLinksClickable(data);
+              var botHtml =
+                '<div class="botText"><span>' + processedData + "</span></div>";
+              $("#chatbox").append($.parseHTML(botHtml));
+              $(".chat-body").scrollTop($(".chat-body")[0].scrollHeight);
+              $("#feedback").show();
+            })
+            .fail(function () {
+              $(".loading").remove();
+              var errorHtml =
+                '<div class="botText error"><span>❌ Erreur de connexion</span></div>';
+              $("#chatbox").append(errorHtml);
+            });
+          event.preventDefault();
+        });
+
+        // Fonction pour charger les informations des modes
+        function loadModeInfo() {
+          $.get("/modes_info").done(function (data) {
+            updateModeDisplay(data.current_mode, data.available_modes);
+          });
+        }
+
+        // Fonction pour changer le mode de réponse
+        function changeResponseMode(mode) {
+          $.post("/set_mode", { mode: mode }).done(function (response) {
+            if (response.status === "success") {
+              var successHtml =
+                '<div class="botText system"><span>🔧 ' +
+                response.message +
+                "</span></div>";
+              $("#chatbox").append(successHtml);
+              $(".chat-body").scrollTop($(".chat-body")[0].scrollHeight);
+
+              // Mise à jour de l'affichage
+              $.get("/modes_info").done(function (data) {
+                updateModeDisplay(mode, data.available_modes);
+              });
+            }
+          });
+        }
+
+        // Fonction pour mettre à jour l'affichage des informations du mode
+        function updateModeDisplay(currentMode, modes) {
+          if (modes[currentMode]) {
+            $("#modeTitle").text(modes[currentMode].name);
+            $("#modeDesc").text(modes[currentMode].description);
+
+            $("#modePros").empty();
+            modes[currentMode].pros.forEach(function (pro) {
+              $("#modePros").append("<li>" + pro + "</li>");
+            });
+
+            $("#modeCons").empty();
+            modes[currentMode].cons.forEach(function (con) {
+              $("#modeCons").append("<li>" + con + "</li>");
+            });
+
+            $("#responseMode").val(currentMode);
+          }
+        }
+
+        $("#correct").on("click", function () {
+          $("#feedback").hide();
+        });
+
+        $("#incorrect").on("click", function () {
+          $("#expected-response").show();
+        });
+
+        $("#submit-expected").on("click", function () {
+          var expectedText = $("#expected-text").val().trim();
+          if (expectedText === "") {
+            alert("Le champ de réponse attendue ne doit pas être vide.");
+            return false;
+          }
+          var question = $(".userText").last().text();
+          $.ajax({
+            data: {
+              question: question,
+              expected: expectedText,
+            },
+            type: "POST",
+            url: "/feedback",
+          }).done(function () {
+            $("#expected-response").hide();
+            $("#feedback").hide();
+          });
+        });
+
+        $("#quit").on("click", function () {
+          $.ajax({
+            type: "POST",
+            url: "/quit",
+          }).done(function () {
+            window.location.href = "/";
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+# Liste des dépendances requises pour le projet - Version 2.0
+# Core Flask et Web
+flask==2.1.0
+requests==2.28.1
+
+# NLP et Machine Learning
+nltk==3.6.5
+numpy==1.21.4
+scikit-learn==1.0.1
+
+# Base de données et vectorisation
+sqlalchemy==1.4.46
+sentence-transformers==2.2.2
+pymysql==1.0.2
+
+# TensorFlow (optionnel pour compatibilité legacy)
+tensorflow==2.7.0
+
+# Utilitaires
+colorama==0.4.4
+python-dotenv==0.19.2
+pyjwt==2.4.0
+werkzeug==2.0.3
+
+# Développement (optionnel)
+pytest==7.1.2
+pytest-flask==1.2.0

@@ -1,0 +1,20 @@
+Licence Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+
+Copyright (c) [2024] Samuel Verschueren
+
+Cette œuvre est mise à disposition selon les termes de la Licence Creative Commons Attribution - Pas d'Utilisation Commerciale 4.0 International.
+
+Vous êtes autorisé à :
+- Partager : copier, distribuer et communiquer le matériel par tous moyens et sous tous formats
+- Adapter : remixer, transformer et créer à partir du matériel
+
+Selon les conditions suivantes :
+- Attribution : Vous devez créditer l'Œuvre, intégrer un lien vers la licence et indiquer si des modifications ont été effectuées à l'Œuvre. Vous devez indiquer ces informations par tous les moyens raisonnables, sans toutefois suggérer que l'Offrant vous soutient ou soutient la façon dont vous avez utilisé son Œuvre.
+- Pas d'Utilisation Commerciale : Vous n'êtes pas autorisé à faire un usage commercial de cette Œuvre, tout ou partie du matériel la composant.
+
+Pas de restrictions complémentaires : Vous n'êtes pas autorisé à appliquer des conditions légales ou des mesures techniques qui restreindraient légalement autrui à utiliser l'Œuvre dans les conditions décrites par la licence.
+
+Pour plus d'informations sur cette licence, veuillez consulter :
+https://creativecommons.org/licenses/by-nc/4.0/legalcode.fr
+
+Pour toute utilisation commerciale, veuillez contacter l'auteur pour obtenir une autorisation explicite.

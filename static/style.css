@@ -1,0 +1,198 @@
+body {
+  font-family: "Arial", sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  width: 400px;
+  height: 600px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  background-color: #4c2e88;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+}
+
+.chat-header h1 {
+  margin: 0 0 15px 0;
+  font-size: 1.2em;
+}
+
+.mode-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0;
+  flex-wrap: wrap;
+}
+
+.mode-controls label {
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.mode-controls select {
+  padding: 5px;
+  border-radius: 3px;
+  border: none;
+  background: white;
+  color: #333;
+}
+
+.mode-info-panel {
+  background-color: #f8f9fa;
+  color: #333;
+  padding: 15px;
+  border-top: 1px solid #dee2e6;
+  font-size: 0.9em;
+}
+
+.mode-info-panel h3 {
+  margin: 0 0 10px 0;
+  color: #4c2e88;
+}
+
+.mode-pros-cons {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.pros,
+.cons {
+  flex: 1;
+}
+
+.pros ul,
+.cons ul {
+  margin: 5px 0;
+  padding-left: 20px;
+}
+
+.pros li {
+  color: #28a745;
+}
+
+.cons li {
+  color: #dc3545;
+}
+
+.chat-body {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+}
+
+.chat-footer {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.form-control {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #4c2e88;
+  color: #fff;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #ab85ec;
+}
+
+.userText,
+.botText {
+  margin: 10px 0;
+  display: flex;
+}
+
+.userText {
+  justify-content: flex-end;
+}
+
+.botText {
+  justify-content: flex-start;
+}
+
+.userText span,
+.botText span {
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 60%;
+  word-wrap: break-word;
+}
+
+.userText span {
+  background-color: #4c2e88;
+  color: #fff;
+}
+
+.botText span {
+  background-color: #ef5350;
+  color: #fff;
+}
+
+.botText.system span {
+  background-color: #2196f3;
+  color: #fff;
+}
+
+.botText.loading span {
+  background-color: #9e9e9e;
+  color: #fff;
+  animation: pulse 1.5s infinite;
+}
+
+.botText.error span {
+  background-color: #f44336;
+  color: #fff;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.botText span a {
+  color: #ffff8d; /* Jaune pâle */
+  text-decoration: underline;
+  font-weight: bold; /* Pour rendre le lien plus visible */
+}
+
+.botText span a:hover {
+  color: #ffffa8; /* Un jaune légèrement plus clair au survol */
+  text-decoration: none; /* Enlève le soulignement au survol pour un effet visuel */
+}
