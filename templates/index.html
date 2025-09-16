@@ -20,45 +20,51 @@
         color: #ffffa8; /* Un jaune légèrement plus clair au survol */
         text-decoration: none;
       }
+
+      .model-status {
+        font-size: 0.8em;
+        color: #666;
+        margin-left: 10px;
+        display: none;
+      }
+
+      .model-status.loading {
+        color: #ff9800;
+        display: inline;
+      }
+
+      .model-status.ready {
+        color: #4caf50;
+        display: inline;
+      }
+
+      /* Styles simplifiés pour l'en-tête sans modes */
+      .chat-header {
+        text-align: center;
+        padding: 15px;
+      }
+
+      .status-info {
+        font-size: 0.9em;
+        color: #ddd;
+        margin: 10px 0;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="chat-header">
         <h1>Mila Assist - Assistant virtuel pour streameur</h1>
-        <div class="mode-controls">
-          <label for="responseMode">Mode de réponse:</label>
-          <select id="responseMode" class="form-control">
-            <option value="minimal">Minimal (Rapide)</option>
-            <option value="balanced" selected>Équilibré (Recommandé)</option>
-            <option value="natural">Naturel (Avancé)</option>
-          </select>
-          <button id="modeInfo" class="btn btn-info">ℹ️</button>
+        <div class="status-info">
+          <span id="modelStatus" class="model-status">🧠 Chargement...</span>
+          <span style="color: #ddd; font-size: 0.8em;">Bientot les reformulations seront disponible</span>
         </div>
         <button id="quit" class="btn btn-danger">Quitter</button>
-      </div>
-      <div id="modeInfoPanel" class="mode-info-panel" style="display: none">
-        <div class="mode-description">
-          <h3 id="modeTitle">Mode Équilibré</h3>
-          <p id="modeDesc">
-            Reformulation avec templates, bon compromis performance/qualité
-          </p>
-          <div class="mode-pros-cons">
-            <div class="pros">
-              <strong>✅ Avantages:</strong>
-              <ul id="modePros"></ul>
-            </div>
-            <div class="cons">
-              <strong>❌ Inconvénients:</strong>
-              <ul id="modeCons"></ul>
-            </div>
-          </div>
-        </div>
       </div>
       <div class="chat-body">
         <div id="chatbox">
           <div class="botText">
-            <span>Bonjour, je suis votre bot.</span>
+            <span>Bonjour, je suis Mila, votre assistant virtuel pour le streaming.</span>
           </div>
         </div>
       </div>
@@ -68,7 +74,7 @@
             id="text"
             type="text"
             name="msg"
-            placeholder="Message"
+            placeholder="Tapez votre message..."
             class="form-control"
           />
           <button type="submit" id="send" class="btn btn-warning">
@@ -95,6 +101,11 @@
     </div>
 
     <script>
+      // Variable globale pour la session unique
+      let currentSessionId = null;
+      let lastQuestion = "";
+      let lastResponse = "";
+
       function makeLinksClickable(text) {
         var urlRegex = /(https?:\/\/[^\s]+)/g;
         return text.replace(urlRegex, function (url) {
@@ -102,20 +113,72 @@
         });
       }
 
+      // Créer une session unique au chargement de la page (SILENCIEUX)
+      function initializeSession() {
+        const timestamp = Date.now();
+        const randomId = Math.random().toString(36).substr(2, 8);
+        currentSessionId = `session_${timestamp}_${randomId}`;
+
+        console.log("Session initialisée:", currentSessionId);
+        // SUPPRIMÉ: Plus d'affichage du message de session dans l'interface
+
+        // Vérifier le statut du modèle local
+        checkModelStatus();
+      }
+
+      // Vérifier le statut du modèle local
+      function checkModelStatus() {
+        $.get("/model_status")
+          .done(function (data) {
+            updateModelStatus(data.status, data.message);
+          })
+          .fail(function () {
+            updateModelStatus("unknown", "Statut inconnu");
+          });
+      }
+
+      // Mettre à jour l'indicateur de statut du modèle
+      function updateModelStatus(status, message) {
+        const $status = $("#modelStatus");
+
+        $status.removeClass("loading ready");
+
+        if (status === "loading") {
+          $status
+            .addClass("loading")
+            .text("🧠 " + message)
+            .show();
+        } else if (status === "ready") {
+          $status.addClass("ready").text("🧠 " + message);
+          // Masquer après 3 secondes quand prêt
+          setTimeout(() => {
+            $status.fadeOut();
+          }, 3000);
+        } else if (status === "error") {
+          $status
+            .addClass("loading")
+            .text("⚠️ " + message)
+            .show();
+        } else {
+          $status.hide();
+        }
+      }
+
       $(document).ready(function () {
-        // Chargement des informations des modes au démarrage
-        loadModeInfo();
+        // Initialiser la session une seule fois au chargement
+        initializeSession();
 
-        // Gestionnaire pour le changement de mode
-        $("#responseMode").on("change", function () {
-          var selectedMode = $(this).val();
-          changeResponseMode(selectedMode);
-        });
+        // Vérifier le statut du modèle périodiquement si en cours de chargement
+        setInterval(function () {
+          if (
+            $("#modelStatus").hasClass("loading") &&
+            $("#modelStatus").is(":visible")
+          ) {
+            checkModelStatus();
+          }
+        }, 5000);
 
-        // Gestionnaire pour afficher/masquer les infos du mode
-        $("#modeInfo").on("click", function () {
-          $("#modeInfoPanel").slideToggle();
-        });
+        // SUPPRIMÉ: Gestion des modes de réponse (plus utilisée)
 
         $("form").on("submit", function (event) {
           var rawText = $("#text").val().trim();
@@ -123,6 +186,10 @@
             alert("Le champ de texte ne doit pas être vide.");
             return false;
           }
+
+          // Sauvegarder la question pour le feedback
+          lastQuestion = rawText;
+
           var userHtml =
             '<div class="userText"><span>' + rawText + "</span></div>";
           $("#text").val("");
@@ -135,16 +202,23 @@
           $("#chatbox").append(loadingHtml);
           $(".chat-body").scrollTop($(".chat-body")[0].scrollHeight);
 
+          // Utiliser la session existante
+          var postData = {
+            msg: rawText,
+            session_id: currentSessionId,
+          };
+
           $.ajax({
-            data: {
-              msg: rawText,
-            },
+            data: postData,
             type: "POST",
             url: "/get",
           })
             .done(function (data) {
               // Suppression de l'indicateur de chargement
               $(".loading").remove();
+
+              // Sauvegarder la réponse pour le feedback
+              lastResponse = data;
 
               var processedData = makeLinksClickable(data);
               var botHtml =
@@ -153,60 +227,19 @@
               $(".chat-body").scrollTop($(".chat-body")[0].scrollHeight);
               $("#feedback").show();
             })
-            .fail(function () {
+            .fail(function (xhr, status, error) {
               $(".loading").remove();
               var errorHtml =
-                '<div class="botText error"><span>❌ Erreur de connexion</span></div>';
+                '<div class="botText error"><span>❌ Erreur de connexion: ' +
+                error +
+                "</span></div>";
               $("#chatbox").append(errorHtml);
+              $(".chat-body").scrollTop($(".chat-body")[0].scrollHeight);
             });
           event.preventDefault();
         });
 
-        // Fonction pour charger les informations des modes
-        function loadModeInfo() {
-          $.get("/modes_info").done(function (data) {
-            updateModeDisplay(data.current_mode, data.available_modes);
-          });
-        }
-
-        // Fonction pour changer le mode de réponse
-        function changeResponseMode(mode) {
-          $.post("/set_mode", { mode: mode }).done(function (response) {
-            if (response.status === "success") {
-              var successHtml =
-                '<div class="botText system"><span>🔧 ' +
-                response.message +
-                "</span></div>";
-              $("#chatbox").append(successHtml);
-              $(".chat-body").scrollTop($(".chat-body")[0].scrollHeight);
-
-              // Mise à jour de l'affichage
-              $.get("/modes_info").done(function (data) {
-                updateModeDisplay(mode, data.available_modes);
-              });
-            }
-          });
-        }
-
-        // Fonction pour mettre à jour l'affichage des informations du mode
-        function updateModeDisplay(currentMode, modes) {
-          if (modes[currentMode]) {
-            $("#modeTitle").text(modes[currentMode].name);
-            $("#modeDesc").text(modes[currentMode].description);
-
-            $("#modePros").empty();
-            modes[currentMode].pros.forEach(function (pro) {
-              $("#modePros").append("<li>" + pro + "</li>");
-            });
-
-            $("#modeCons").empty();
-            modes[currentMode].cons.forEach(function (con) {
-              $("#modeCons").append("<li>" + con + "</li>");
-            });
-
-            $("#responseMode").val(currentMode);
-          }
-        }
+        // SUPPRIMÉ: Fonctions de gestion des modes (plus utilisées)
 
         $("#correct").on("click", function () {
           $("#feedback").hide();
@@ -222,27 +255,66 @@
             alert("Le champ de réponse attendue ne doit pas être vide.");
             return false;
           }
-          var question = $(".userText").last().text();
+
           $.ajax({
             data: {
-              question: question,
+              question: lastQuestion,
               expected: expectedText,
+              current_response: lastResponse,
             },
             type: "POST",
             url: "/feedback",
-          }).done(function () {
-            $("#expected-response").hide();
-            $("#feedback").hide();
-          });
+          })
+            .done(function (response) {
+              $("#expected-response").hide();
+              $("#feedback").hide();
+              $("#expected-text").val("");
+
+              var feedbackHtml =
+                '<div class="botText system"><span>✅ Feedback envoyé. Merci !</span></div>';
+              $("#chatbox").append(feedbackHtml);
+              $(".chat-body").scrollTop($(".chat-body")[0].scrollHeight);
+            })
+            .fail(function () {
+              var errorHtml =
+                '<div class="botText error"><span>❌ Erreur lors de l\'envoi du feedback</span></div>';
+              $("#chatbox").append(errorHtml);
+            });
         });
 
         $("#quit").on("click", function () {
-          $.ajax({
-            type: "POST",
-            url: "/quit",
-          }).done(function () {
-            window.location.href = "/";
-          });
+          if (confirm("Êtes-vous sûr de vouloir fermer l'application ?")) {
+            $.ajax({
+              type: "POST",
+              url: "/quit",
+            })
+              .done(function (response) {
+                alert(
+                  "Application fermée avec succès. Vous pouvez fermer cette fenêtre."
+                );
+                // Fermer la fenêtre après 2 secondes
+                setTimeout(function () {
+                  window.close();
+                }, 2000);
+              })
+              .fail(function () {
+                alert("L'application va se fermer...");
+                setTimeout(function () {
+                  window.close();
+                }, 1000);
+              });
+          }
+        });
+
+        // Nettoyer la session à la fermeture de la page
+        $(window).on("beforeunload", function () {
+          if (currentSessionId) {
+            // Optionnel: notifier l'API de la fin de session
+            navigator.sendBeacon(
+              "/api/sessions/end",
+              JSON.stringify({ session_id: currentSessionId })
+            );
+          }
         });
       });
     </script>
