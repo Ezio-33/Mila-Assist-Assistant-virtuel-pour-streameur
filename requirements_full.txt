@@ -1,0 +1,49 @@
+# Fichier requirements complet pour l'application Priv-_Mila-Assit
+# ============================================================================
+# MODULES PRINCIPAUX (Flask et Web)
+# ============================================================================
+flask>=2.3.0
+werkzeug>=2.3.0
+
+# ============================================================================
+# MACHINE LEARNING ET IA
+# ============================================================================
+# TensorFlow pour le modèle Keras
+tensorflow>=2.13.0
+
+# Keras Tuner pour l'optimisation d'hyperparamètres (train_v3.py)
+keras-tuner>=1.4.0
+
+# Scikit-learn pour le preprocessing avancé et validation croisée
+scikit-learn>=1.3.0
+
+# NumPy pour les calculs numériques
+numpy>=1.24.0
+
+# ============================================================================
+# TRAITEMENT DE LANGAGE NATUREL (NLP)
+# ============================================================================
+# NLTK pour lemmatisation et tokenisation
+nltk>=3.8.0
+
+# ============================================================================
+# BASE DE DONNÉES
+# ============================================================================
+# PyMySQL pour connexion MySQL
+pymysql>=1.1.0
+
+# ============================================================================
+# REQUÊTES HTTP ET API
+# ============================================================================
+# Requests pour les appels API
+requests>=2.31.0
+
+# urllib3 pour la gestion des certificats SSL
+urllib3>=2.0.0
+
+# ============================================================================
+# CONFIGURATION ET ENVIRONNEMENT
+# ============================================================================
+# python-dotenv pour la gestion des variables d'environnement
+python-dotenv>=1.0.0
+
