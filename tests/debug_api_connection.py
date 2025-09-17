@@ -499,9 +499,9 @@ def test_invalid_endpoints():
     print("\n🔍 TEST 15: Endpoints non valides (Test de robustesse)")
     invalid_endpoints = [
         '/api/sessions',  # Supprimé dans la refactorisation
-        '/api/nonexistent',  # N'existe pas
-        '/api/admin',  # N'existe pas
-        '/api/invalid',  # N'existe pas
+        '/api/nonexistent',
+        '/api/admin',
+        '/api/invalid', 
         '/api/fr/inexistant'  # Route française inexistante
     ]
     
