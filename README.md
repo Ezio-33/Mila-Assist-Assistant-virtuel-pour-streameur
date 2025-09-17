@@ -6,433 +6,224 @@
 ![License](https://img.shields.io/badge/license-CC%20BY--NC%204.0-yellow)
 ![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
 
-**Mila Assist** est un assistant virtuel intelligent conçu spécifiquement pour les streameurs. Il utilise une architecture hybride combinant une API externe et un modèle de machine learning local pour fournir des réponses rapides et pertinentes aux questions des spectateurs.
+**Mila Assist** est un assistant virtuel destiné aux créateurs de contenu utilisant la plateforme AI_Licia.
+Son objectif : guider les streameurs dans la configuration de leur profil IA (voix, personnalité, comportements) et répondre aux questions récurrentes de leur communauté.
+Grâce à une architecture hybride (modèle local + API externe), Mila Assist est disponible 24h/24, 7j/7 avec des réponses rapides et pertinentes.
+Ce projet, initié dans le cadre de la formation RNCP 6, constitue un portfolio technique complet.
+
+---
 
 ## 📋 Table des matières
 
-- [🎯 Objectifs](#-objectifs)
-- [✨ Fonctionnalités](#-fonctionnalités)
+1. [Objectifs](#objectifs)
+2. [Fonctionnalités](#fonctionnalites)
+3. [Architecture](#architecture)
+4. [Prérequis](#prerequis)
+5. [Installation](#installation)
+6. [Configuration](#configuration)
+7. [Utilisation](#utilisation)
+8. [Modes de fonctionnement](#modes-de-fonctionnement)
+9. [Entraînement du modèle](#entrainement-du-modele)
+10. [Tests](#tests)
+11. [Contribution](#contribution)
+12. [Licence](#licence)
+13. [Auteur](#auteur)
 
-## Objectifs
+---
 
-Mila Assist a été développé dans le cadre du **RNCP 6 - Concepteur Développeur d'Applications** avec les objectifs suivants :
+## 🎯 Objectifs
 
-- **Assistance automatisée** : Répondre aux questions fréquentes des spectateurs avec 94.6% de précision
-- **Haute disponibilité** : Fonctionnement garanti avec fallback automatique API → Local
-- **Performance optimale** : Réponses en moins de 500ms en moyenne (mode local : 145ms)
-- **Évolutivité** : Architecture modulaire avec 5 services métier indépendants
-- **Simplicité d'utilisation** : Interface web responsive et intuitive
+- **Assistance automatisée** : répondre aux questions fréquentes des spectateurs avec un haut niveau de précision.
+- **Haute disponibilité** : basculement automatique vers le modèle local en cas d’indisponibilité de l’API.
+- **Performances optimales** : temps de réponse courts grâce au préchargement du modèle et à l’optimisation du code.
+- **Évolutivité** : architecture modulaire en micro‑services pour faciliter l’ajout de fonctionnalités et la maintenance.
+- **Simplicité d’utilisation** : interface web responsive accessible à tous, assistance 24h/24.
+
+---
 
 ## ✨ Fonctionnalités
 
-- **Chargement asynchrone** du modèle TensorFlow sans bloquer l'interface
-- **Gestion des sessions** utilisateur avec persistance
-- **Système de feedback** pour amélioration continue des réponses
-- **Monitoring temps réel** des performances et de la santé du système
+- **Configuration guidée d’AI_Licia** : création et personnalisation du profil IA (apparence, voix, personnalité).
+- **Chargement asynchrone du modèle** : TensorFlow chargé en arrière‑plan, disponible en local en cas de panne API.
+- **Gestion de session** : conversation fluide et contextuelle pour chaque utilisateur.
+- **Système de feedback** : évaluation des réponses et suggestions pour améliorer le modèle.
+- **Monitoring et journalisation** : surveillance en temps réel, logs structurés avec rotation et masquage des clés sensibles.
+- **Micro‑services spécialisés** : client API, gestion des sessions, feedback, accès aux données.
+- **Protection et sécurité** : validation des entrées, anti‑injection, gestion mémoire intelligente, masquage des clés API, limitation de la taille des messages.
+- **Techniques avancées** :
+  - Architecture microservices (5 services métier)
+  - Configuration sécurisée via variables d'environnement
+  - Logging structuré
+  - Tests automatisés
+  - Mémoire optimisée (< 800MB)
 
-### 🔧 Fonctionnalités techniques
-
-- **Architecture microservices** avec 5 services métier spécialisés
-- **Configuration sécurisée** via variables d'environnement
-- **Logging structuré** avec rotation automatique des fichiers
-- **Tests automatisés** avec suite complète de performance
-- **Gestion intelligente de la mémoire** (< 800MB avec optimisations)
-- **Protection anti-injection** et validation des entrées
+---
 
 ## 🏗️ Architecture
 
-### Vue d'ensemble
+L’architecture suit un modèle micro‑services, facilitant la maintenance et l’évolution :
 
-````
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Interface     │    │   Services      │    │   Données       │
-│     Web         │◄──►│   Métier        │◄──►│   &amp; IA          │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-│                      │                      │
-├── Templates HTML     ├── ChatbotService     ├── API Externe
-├── CSS Responsive     ├── SessionService     ├── Modèle Keras
-├── JavaScript         ├── FeedbackService    ├── Cache JSON
-### Flux de données vérifié
+- **Interface Web** : templates HTML, CSS responsive, JavaScript
+- **Services métier** :
+  - ChatbotService : orchestration des réponses (API ou modèle local)
+  - SessionService : gestion et persistance des sessions utilisateur
+  - FeedbackService : collecte et stockage des évaluations
+  - DatabaseService/API Client : connexion aux bases et API externes
+- **Données & IA** :
+  - Modèle local TensorFlow (chatbot_model.keras)
+  - Cache JSON, fichiers pickles (words.pkl, classes.pkl, training_patterns.pkl)
 
-1. **Requête utilisateur** → Interface web (templates/)
-5. **Réponse** → Interface utilisateur (< 500ms moyenne)
-6. **Feedback optionnel** → FeedbackService pour amélioration continue
+---
 
-```python
-services/
-├── __init__.py                 # Module principal des services
-├── api_client.py              # Client API avec retry et timeout
-├── database_service.py        # Service d'accès base de données
-├── feedback_service.py        # Gestion des retours utilisateur
-└── session_service.py         # Gestion des sessions utilisateur
-````
+## 🛠️ Prérequis
 
-## ⚙️ Technologies utilisées
+- Python ≥ 3.13
+- pip
+- Accès réseau (optionnel, fallback local disponible)
+- 1 Go de RAM libre pour TensorFlow
 
-### Backend
+---
 
-- **NLTK 3.8+** - Traitement du langage naturel
-- **python-dotenv** - Gestion sécurisée de la configuration
-
-- **CSS responsive** - Compatible tous appareils
-
-### Infrastructure
-
-- **pytest** - Tests automatisés (21 fichiers Python)
-- **python-dotenv** - Gestion sécurisée des variables d'environnement
-
-### Prérequis
-
-- Python 3.13 (testé et validé)
-- pip (gestionnaire de paquets Python)
-- Accès réseau pour l'API externe (optionnel, fallback local disponible)
-- Minimum 1 GB RAM libre pour TensorFlow
+## 🚀 Installation
 
 ### Installation rapide
 
-# 1. Cloner le repository
-
-git clone <url-du-repo>
+```bash
+git clone https://github.com/Ezio-33/Mila-Assist-Assistant-virtuel-pour-streameur.git
 cd Mila-Assist-Assistant-virtuel-pour-streameur
-
-# Éditer .env avec vos paramètres
-
-# 4. Démarrer l'application
-
+pip install -r requirements_full.txt
+cp .env.example .env
 python start.py web
+```
 
-````
-
-### Installation avec script automatique
+### Installation avec script automatisé
 
 ```bash
-# Utilisation du script d'installation vérifié
 chmod +x install_dependencies.sh
 ./install_dependencies.sh
-````
+```
 
-### Installation manuelle détaillée
+### Installation manuelle
 
 ```bash
-# 1. Créer un environnement virtuel (recommandé)
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# ou
-venv\Scripts\activate     # Windows
-
-# 2. Installer les dépendances principales
-pip install flask>=2.3.0
-pip install tensorflow>=2.13.0
-pip install nltk>=3.8.0
-pip install requests>=2.31.0
-pip install python-dotenv>=1.0.0
-
-# 3. Télécharger les données NLTK
+venv\Scripts\activate    # Windows
+pip install flask>=2.3.0 tensorflow>=2.13.0 nltk>=3.8.0 requests>=2.31.0 python-dotenv>=1.0.0
 python -c "import nltk; nltk.download('punkt'); nltk.download('wordnet')"
-
-# 4. Configuration
 cp .env.example .env
-```
-
-## 🎮 Utilisation
-
-### Démarrage rapide
-
-```bash
-# Démarrage avec interface web
 python start.py web
-
-# Démarrage avec monitoring
-python start.py web --monitor
-
-# Démarrage en mode debug
-python start.py web --debug
-
-# Installation automatique des dépendances
-python start.py install
 ```
 
-### Interface web
+---
 
-Une fois l'application démarrée, accédez à :
+## ⚙️ Configuration
 
-- **URL principale** : http://localhost:5000
-- **API de statut** : http://localhost:5000/model_status
-- **API de santé** : http://localhost:5000/health
-
-### Utilisation de l'interface
-
-1. **Poser une question** dans le champ de texte
-2. **Envoyer** en appuyant sur Entrée ou le bouton
-3. **Recevoir la réponse** instantanément
-4. **Donner un feedback** (optionnel) pour améliorer le système
-
-## 📊 Modes de fonctionnement
-
-### Mode Hybride (Par défaut)
-
-- **API prioritaire** : Réponses depuis l'API externe (99.0% de précision)
-- **Fallback automatique** : Basculement transparent vers le modèle local
-- **Timeout optimisé** : 1 seconde maximum pour l'API
-- **Expérience utilisateur** : Aucune différence visible pour l'utilisateur
-
-**Métriques mesurées :**
-
-- Temps moyen : 614.5ms (mode API)
-- Précision : 99.0% (98/99 tests réussis)
-- Fallback fonctionnel : 100% des cas
-
-### Mode Local Intelligent
-
-- **Fallback complet** : Utilise tous les mécanismes de récupération
-- **Optimisations** : Cache et preprocessing avancé
-- **Robustesse** : Gestion complète des erreurs
-
-**Métriques mesurées :**
-
-- Temps moyen : 485.5ms
-- Précision : 94.9% (94/99 tests réussis)
-- Utilisation mémoire : < 800MB
-
-### Mode Local Brut (Keras seul)
-
-- **Performance pure** : Modèle TensorFlow sans optimisations
-- **Rapidité maximale** : Réponses directes du réseau de neurones
-- **Léger** : Minimal en ressources
-
-**Métriques mesurées :**
-
-- Temps moyen : 145.2ms (le plus rapide)
-- Précision : 89.9% (89/99 tests réussis)
-- Chargement du modèle : < 30 secondes
-
-## 🧪 Tests et Performance
-
-### Métriques de Performance Réelles
-
-**Résultats des tests automatisés (17 septembre 2025) :**
-
-| Métrique               | Valeur                  | Statut |
-| ---------------------- | ----------------------- | ------ |
-| Configuration          | 28.0ms                  | ✅     |
-| Temps moyen combiné    | 415.1ms                 | ✅     |
-| Précision globale      | 94.6%                   | ✅     |
-| Charge supportée       | 20 requêtes simultanées | ✅     |
-| Taux de succès         | 100%                    | ✅     |
-| Récupération d'erreurs | 100% (5/5)              | ✅     |
-| Gestion cas limites    | 100% (6/6)              | ✅     |
-
-### Suite de tests complète
-
-```bash
-# Exécuter tous les tests
-python -m pytest tests/ -v
-
-# Test de performance léger (recommandé)
-python tests/test_performance_leger.py
-
-# Tests spécifiques
-python tests/test_fonctionnement_local.py
-python tests/debug_api_connection.py
-python tests/test_fallback_keras.py
-```
-
-### Tests de robustesse validés
-
-- **Protection anti-injection** : Validé avec caractères spéciaux
-- **Gestion mémoire** : Testé jusqu'à saturation (800MB)
-- **Récupération d'erreurs** : 100% de réussite (API, config, timeout, mémoire)
-- **Cas limites** : Messages longs, vides, multilingues, répétitions
-- **Charge** : Testé jusqu'à 20 requêtes simultanées
-
-### Rapport détaillé
-
-Un rapport de performance détaillé est généré automatiquement dans `tests/test_perf.md` avec :
-
-- Métriques de précision par question
-- Temps de réponse détaillés
-- Analyse des modes de fonctionnement
-- Recommandations d'optimisation
-
-## 📝 Configuration
-
-### Variables d'environnement (Sécurisées)
-
-Créez un fichier `.env` à la racine du projet avec les paramètres sécurisés :
+Les paramètres sensibles sont centralisés dans `.env` (exemple fourni) :
 
 ```env
-# Configuration serveur
 HOST=localhost
 PORT=5000
 DEBUG=false
-
-# Configuration API (masquage automatique des clés dans les logs)
 USE_API=true
 API_URL=https://votre-api.com/chat
-API_KEY=votre_cle_api_securisee
+API_KEY=votre_cle_api
 API_TIMEOUT=1
-
-# Configuration modèle local
 USE_LEGACY_FALLBACK=true
-
-# Sécurité (32 caractères minimum requis)
-SECRET_KEY=votre_cle_secrete_32_caracteres_minimum_genere_aleatoirement
+SECRET_KEY=votre_cle_secrete
 ```
 
-**⚠️ Sécurité :**
+**Bonnes pratiques** :
 
-- Toutes les clés API sont automatiquement masquées dans les logs
-- Les variables sensibles sont chargées via `python-dotenv`
-- Le fichier `.env` doit être exclu du versioning Git
-- Validation automatique des paramètres au démarrage
+- Ne jamais publier de clés sensibles en clair
+- Les clés sont automatiquement masquées dans les logs
 
-### Structure de configuration
+---
 
-La configuration est centralisée dans `config/app_config.py` avec :
+## 🎮 Utilisation
 
-- **Validation automatique** des paramètres obligatoires
-- **Valeurs par défaut** sécurisées (28.0ms de chargement)
-- **Gestion d'erreurs** robuste avec messages explicites
-- **Logging sécurisé** avec masquage automatique des clés
-- **Support des variables d'environnement** via python-dotenv
+Après démarrage, ouvrez votre navigateur à l’URL :
 
-## 🔄 Entraînement du modèle
+- http://localhost:5000/
+- API de statut : /model_status
+- API de santé : /health
 
-### Processus d'entraînement vérifié
+**Interface** :
 
-Le modèle TensorFlow/Keras est entraîné sur des données réelles avec le processus suivant :
+1. Posez votre question
+2. Envoyez (Entrée ou bouton)
+3. Recevez la réponse (API ou modèle local)
 
-1. **Récupération des données** : 122 entrées depuis la base de données API
-2. **Préprocessing NLTK** : Tokenisation et lemmatisation automatiques
-3. **Entraînement du réseau** : Architecture optimisée pour les réponses courtes
-4. **Validation** : Tests sur 99 questions de référence
-5. **Sauvegarde** : Modèle Keras (.keras) avec métadonnées
+---
 
-### Métriques d'entraînement
+## ⚡ Modes de fonctionnement
+
+- **Hybride (par défaut)** : API externe prioritaire, fallback local automatique
+- **Local intelligent** : modèle local optimisé (cache, pré‑traitement, gestion d’erreurs)
+
+---
+
+## 🧠 Entraînement du modèle
+
+Le modèle Keras est entraîné à partir de données Q/R :
+
+- 122 entrées API, tokenisation et lemmatisation NLTK
+- Validation sur 99 questions de référence
+- Fichiers générés : chatbot_model.keras, words.pkl, classes.pkl, training_patterns.pkl
+
+Pour relancer l’entraînement :
 
 ```bash
-# Entraînement avec données de production
 python train.py
-
-# Résultats obtenus :
-# - 99 questions d'entraînement chargées
-# - Basé sur 122 entrées de la base de données
-# - Précision du modèle : 89.9% à 94.9% selon le mode
-# - Fichiers générés : chatbot_model.keras, words.pkl, classes.pkl
 ```
 
-### Fichiers du modèle
+---
 
-- `chatbot_model.keras` : Modèle TensorFlow principal
-- `words.pkl` : Vocabulaire préprocessé
-- `classes.pkl` : Classes de réponses
-- `training_patterns.pkl` : Patterns d'entraînement
+## 🧪 Tests
 
-## � Sécurité
+Suite de tests automatisés pour valider stabilité et performance :
 
-### Mesures de sécurité implémentées
+```bash
+python -m pytest tests/ -v
+```
 
-**Protection des données sensibles :**
+Scripts ciblés : test_performance_leger.py, test_fonctionnement_local.py, etc.
 
-- ✅ Masquage automatique des clés API dans tous les logs
-- ✅ Variables d'environnement sécurisées via `.env`
-- ✅ Validation des entrées utilisateur avec protection anti-injection
-- ✅ Gestion sécurisée des timeouts et des erreurs réseau
+**Résultats (17/09/2025)**
 
-**Robustesse système :**
+- Chargement config : ~14 ms
+- Précision/temps :
+  - Local intelligent : ~95 %, ~418 ms
+  - Local brut : ~90 %, ~114 ms
+  - API : ~99 %, ~620 ms
+- Sécurité anti‑injection : toutes les entrées malveillantes filtrées
+- Dépendances : 11 modules critiques
+- Charge : 5, 10, 20 requêtes simultanées traitées
+- Mémoire : ~1 GB, gestion correcte du cache
+- Cas limites : taux de succès élevé
 
-- ✅ Fallback automatique en cas de panne API
-- ✅ Limitation de la taille des messages (500 caractères max)
-- ✅ Gestion intelligente de la mémoire avec nettoyage automatique
-- ✅ Protection contre les attaques par déni de service
+---
 
-**Audit de sécurité :**
+**Bonnes pratiques** :
 
-- ✅ Tous les fichiers analysés pour l'exposition de secrets
-- ✅ Tests de sécurité anti-injection validés
-- ✅ Configuration sécurisée par défaut
-- ✅ Logs structurés sans exposition de données sensibles
+- Style Python PEP 8
+- Docstrings et type hints
+- Tests unitaires
+- Journalisation appropriée
+- Respect de l’architecture modulaire (services/, config/)
 
-## 🤝 Contribution
-
-### Processus de contribution
-
-1. **Fork** le projet
-2. **Créer une branche** (`git checkout -b feature/ma-fonctionnalite`)
-3. **Commit** les changements (`git commit -am 'Ajout de ma fonctionnalité'`)
-4. **Push** vers la branche (`git push origin feature/ma-fonctionnalite`)
-5. **Créer une Pull Request**
-
-### Standards de code
-
-- **PEP 8** pour le style Python
-- **Docstrings** pour toutes les fonctions
-- **Type hints** pour les paramètres
-- **Tests unitaires** pour les nouvelles fonctionnalités
-- **Logging** approprié pour le débogage
-
-### Architecture à respecter
-
-- **Séparation des responsabilités** (services/)
-- **Configuration centralisée** (config/)
-- **Gestion d'erreurs** robuste
-- **Interface REST** claire
-- **Documentation** complète
+---
 
 ## 📄 Licence
 
-Ce projet est sous licence **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**.
+Mila Assist est distribué sous licence Creative Commons Attribution – Pas d’usage commercial 4.0 International (CC BY‑NC 4.0).
+Vous êtes libre de partager et d’adapter le projet à condition d’indiquer l’auteur original et de ne pas l’utiliser à des fins commerciales sans accord préalable.
 
-### Vous êtes autorisé à :
-
-- ✅ **Partager** : copier, distribuer et communiquer
-- ✅ **Adapter** : remixer, transformer et créer
-
-### Sous conditions :
-
-- 📝 **Attribution** : Créditer l'auteur original
-- 🚫 **Pas d'usage commercial** : Utilisation non-commerciale uniquement
-
-Pour toute utilisation commerciale, contactez l'auteur pour une autorisation.
-
-Voir le fichier [Licence.txt](Licence.txt) pour plus de détails.
+---
 
 ## 👨‍💻 Auteur
 
-**Samuel VERSCHUEREN**  
-_Concepteur Développeur d'Applications RNCP 6_
-
-- 📧 Email : [votre.email@exemple.com]
-- 💼 LinkedIn : [Votre profil LinkedIn]
-- 🐙 GitHub : [Votre profil GitHub]
-
----
-
-### 📊 Statistiques du projet (Mesurées)
-
-- **Lignes de code** : **9415 lignes Python** (vérifiées)
-- **Architecture** : **5 services modulaires** (services/)
-- **Fichiers Python** : **21 fichiers** (tests inclus)
-- **Tests automatisés** : **Suite complète** avec métriques réelles
-- **Dépendances critiques** : **5/5 installées** (flask, tensorflow, nltk, requests, python-dotenv)
-- **Performance** : **415.1ms temps moyen** combiné
-- **Précision globale** : **94.6%** sur tests réels
-- **Utilisation mémoire** : **< 800MB** avec optimisations
-- **Chargement configuration** : **28.0ms**
-- **Charge supportée** : **20 requêtes simultanées** (100% de succès)
-- **Disponibilité** : **100%** avec fallback automatique
-- **Sécurité** : **Audit complet** réalisé avec protection anti-injection
-
-### 🏆 Réalisations techniques vérifiées
-
-- ✅ **Architecture microservices** avec 5 services spécialisés
-- ✅ **Fallback automatique** robuste (100% de récupération)
-- ✅ **Tests de performance** avec métriques réelles
-- ✅ **Configuration sécurisée** avec masquage des clés
-- ✅ **Gestion intelligente** de la mémoire et des erreurs
-- ✅ **Interface responsive** avec chargement asynchrone
-- ✅ **Protection anti-injection** validée par tests
-
----
-
-_Développé avec ❤️ dans le cadre du RNCP 6 - Concepteur Développeur d'Applications_
+Projet créé par **Samuel Verschueren** dans le cadre de la certification RNCP 6 – Concepteur Développeur d’Applications.
+Auteur et mainteneur principal de Mila Assist.
+Contact : [LinkedIn](www.linkedin.com/in/
+samuel-verschueren)
