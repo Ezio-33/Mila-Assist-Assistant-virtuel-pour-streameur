@@ -732,6 +732,16 @@ class ChatbotService:
                                      temps_reponse_ms: Optional[float] = None):
         """Enregistrer la conversation via l'API française"""
         try:
+            # Skip l'enregistrement si c'est un test de performance
+            if session_id and ('perf_test_' in session_id or 'test_' in session_id):
+                logger.debug(f"🧪 Enregistrement ignoré pour session de test: {session_id[:20]}...")
+                return
+            
+            # Skip l'enregistrement si désactivé pour les tests
+            if hasattr(self, 'save_conversations') and not self.save_conversations:
+                logger.debug("🧪 Enregistrement des conversations désactivé (mode test)")
+                return
+            
             # Utiliser le client API français pour enregistrer
             success = self.api_client.enregistrer_conversation(
                 session_id, question, reponse, 
