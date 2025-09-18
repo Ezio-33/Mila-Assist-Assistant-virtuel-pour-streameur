@@ -7,8 +7,9 @@
 ![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
 
 **Mila Assist** est un assistant virtuel destiné aux créateurs de contenu utilisant la plateforme AI_Licia.
-Son objectif : guider les streameurs dans la configuration de leur profil IA (voix, personnalité, comportements) et répondre aux questions récurrentes de leur communauté.
+Son objectif : guider les streameurs dans la configuration de leur profil IA (voix, personnalité, comportements) et répondre aux questions récurrentes pour soulagé le support sur discord.
 Grâce à une architecture hybride (modèle local + API externe), Mila Assist est disponible 24h/24, 7j/7 avec des réponses rapides et pertinentes.
+Dans le futur je souhaite aussi integré des question et des aides pour le monde du stream.
 Ce projet, initié dans le cadre de la formation RNCP 6, constitue un portfolio technique complet.
 
 ---
