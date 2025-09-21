@@ -196,3 +196,7 @@ body {
   color: #ffffa8; /* Un jaune légèrement plus clair au survol */
   text-decoration: none; /* Enlève le soulignement au survol pour un effet visuel */
 }
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

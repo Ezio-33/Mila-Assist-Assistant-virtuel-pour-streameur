@@ -57,14 +57,19 @@
         <h1>Mila Assist - Assistant virtuel pour streameur</h1>
         <div class="status-info">
           <span id="modelStatus" class="model-status">🧠 Chargement...</span>
-          <span style="color: #ddd; font-size: 0.8em;">Bientot les reformulations seront disponible</span>
+          <span style="color: #ddd; font-size: 0.8em"
+            >Bientot les reformulations seront disponible</span
+          >
         </div>
         <button id="quit" class="btn btn-danger">Quitter</button>
       </div>
       <div class="chat-body">
         <div id="chatbox">
           <div class="botText">
-            <span>Bonjour, je suis Mila, votre assistant virtuel pour le streaming.</span>
+            <span
+              >Bonjour, je suis Mila, votre assistant virtuel pour le
+              streaming.</span
+            >
           </div>
         </div>
       </div>
@@ -82,8 +87,10 @@
           </button>
         </form>
         <div id="feedback" style="display: none">
-          <button id="correct" class="btn btn-success">Correct</button>
-          <button id="incorrect" class="btn btn-danger">Incorrect</button>
+          <button id="correct" class="btn btn-success" disabled>Correct</button>
+          <button id="incorrect" class="btn btn-danger" disabled>
+            Incorrect
+          </button>
           <div id="expected-response" style="display: none">
             <input
               id="expected-text"
