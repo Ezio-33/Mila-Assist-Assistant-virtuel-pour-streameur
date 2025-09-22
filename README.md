@@ -226,4 +226,4 @@ Vous êtes libre de partager et d’adapter le projet à condition d’indiquer 
 
 Projet créé par **Samuel Verschueren** dans le cadre de la certification RNCP 6 – Concepteur Développeur d’Applications.
 Auteur et mainteneur principal de Mila Assist.
-Contact : [LinkedIn](www.linkedin.com/in/samuel-verschueren)
+Contact : [LinkedIn](https://www.linkedin.com/in/samuel-verschueren)
